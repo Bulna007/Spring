@@ -1,10 +1,13 @@
 package org.example.config;
 
+import org.example.entity.Permissions;
+import org.example.entity.Role;
 import org.example.filter.JWTAuthFilter;
 import org.example.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,7 +34,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/h2-console", "/authenticate").permitAll()
-                        .anyRequest().authenticated())
+                                //.requestMatchers("/user/**").hasRole(Role.ADMIN.name())
+                                .requestMatchers(HttpMethod.GET, "/user/**").hasAuthority(Permissions.USER_READ.name())
+                                .requestMatchers(HttpMethod.POST, "/user/**").hasAuthority(Permissions.USER_WRITE.name())
+                                .requestMatchers(HttpMethod.DELETE, "/user/**").hasAuthority(Permissions.USER_DELETE.name())
+                                .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
