@@ -3,6 +3,16 @@ spring:
     name: ecomm-order-service
 server:
   port: 8080
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30 # Service Registry & Local Cache
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    lease-renewal-interval-in-seconds: 30 #HeartBeats & Registry Updates
 logging:
   level:
     org.bulna.ecommorderservice.client: DEBUG
+    com.netflix.discovery: DEBUG
