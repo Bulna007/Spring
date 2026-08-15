@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: ecomm-order-service
+server:
+  port: 8080
+logging:
+  level:
+    org.bulna.ecommorderservice.client: DEBUG
