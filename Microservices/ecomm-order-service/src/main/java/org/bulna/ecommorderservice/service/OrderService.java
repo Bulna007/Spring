@@ -3,6 +3,7 @@ package org.bulna.ecommorderservice.service;
 import org.bulna.ecommorderservice.client.InventoryClient;
 import org.bulna.ecommorderservice.dto.Inventory;
 import org.bulna.ecommorderservice.exception.MyCustomRuntimeException;
+import org.bulna.ecommorderservice.exception.OutOfStockException;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatusCode;
@@ -53,21 +54,13 @@ public class OrderService {
                 .retrieve()
                 .toEntity(Inventory.class);*/
 
-        Inventory inventory = inventoryClient.getInventory(productId);
-        int quantity = inventory.getQuantity();
-        updateInventory(inventory);
-        return quantity > 0 ?
-                "Order Placed" :
-                "Product out of stock";
-    }
-
-    private void updateInventory(Inventory inventory) {
-        inventory.setQuantity(inventory.getQuantity() - 1);
-        /*restClient.post()
-                .uri("http://localhost:8081/inventory")
-                .body(inventory)
-                .retrieve()
-                .toBodilessEntity();*/
-        inventoryClient.updateInventory(inventory);
+        // Inventory checks and decrements in one atomic step; a read-then-write from here
+        // would let concurrent orders oversell and could drive stock negative.
+        try {
+            inventoryClient.reserve(productId);
+            return "Order Placed";
+        } catch (OutOfStockException e) {
+            return "Product out of stock";
+        }
     }
 }

@@ -9,6 +9,9 @@ public class CustomErrorDecoder implements ErrorDecoder {
         if(response.status() == 404){
             return new RuntimeException("Product Not Found");
         }
+        if(response.status() == 409){
+            return new OutOfStockException();
+        }
         return new RuntimeException("Generic Error: "+response.status());
     }
 }

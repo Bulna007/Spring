@@ -16,4 +16,6 @@ public interface InventoryClient {
     Inventory getInventory(@PathVariable Long productId);
     @PostMapping("/inventory")
     String updateInventory(@RequestBody Inventory inventory);
+    @PostMapping("/inventory/{productId}/reserve")
+    void reserve(@PathVariable Long productId);
 }
